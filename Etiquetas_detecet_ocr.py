@@ -213,32 +213,3 @@ while True:
         print("Program ended.")
         cv2.destroyAllWindows()
         break
-
-
-
-'''
-while(True):
-    # Capture frame-by-frame
-    ret, frame = cap.read()
-
-    # Our operations on the frame come here
-    #gray = cv2.cvtColor(frame, 0)
-    #print(type(gray))
-    # Display the resulting frame
-    cv2.imshow('frame',frame)
-    
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-    
-    elif cv2.waitKey(1) == ord('s'): # wait for 's' key to save and exit
-        dt = datetime.datetime.now()    
-        print(dt)
-        #etiq_ocr = detect_etiqueta(gray)
-        cv2.imwrite('pallet000.png'.format(dt),frame)
-        text_file = open("Output.txt", "a")
-        text_file.write("\n {} - {}".format(dt,dt))#etiq_ocr, dt))
-        text_file.close()
-
-# When everything done, release the capture
-cap.release()
-cv2.destroyAllWindows()'''
