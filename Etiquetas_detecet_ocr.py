@@ -1,21 +1,11 @@
-#import numpy as np
 import cv2
 import numpy as np
 import time
 import os
 import matplotlib.pyplot as plt
-#import pytesseract
+from easyocr import Reader
 from PIL import Image
 import datetime
-
-# Video source - can be camera index number given by 'ls /dev/video*
-# or can be a video file, e.g. '~/Video.avi'
-
-
-#pytesseract.pytesseract.tesseract_cmd = (r"C:\Program Files\Tesseract-OCR\tesseract.exe")
-
-# Video source - can be camera index number given by 'ls /dev/video*
-# or can be a video file, e.g. '~/Video.avi'
 
 def detect_etiqueta(etiquetas):
     
@@ -35,7 +25,7 @@ def detect_etiqueta(etiquetas):
     #LABELS
     
     # derive the paths to the YOLO weights and model configuration
-    weightsPath = os.path.join("yolov4-obj_last2.weights")
+    weightsPath = os.path.join("yolov4-obj_final.weights")
     configPath = os.path.join("yolov4-obj.cfg")
     
     # Loading the neural network framework Darknet (YOLO was created based on this framework)
@@ -126,7 +116,7 @@ def detect_etiqueta(etiquetas):
 
     #etiquetas = cv2.cvtColor(etiquetas, cv2.COLOR_BGR2RGB)
     im, boxs = predict(etiquetas)
-    im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+    #im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
     cv2.imwrite(filename='pics/bbooox'+i+'.png', img=im)
     #display_img(im)
     
@@ -134,10 +124,8 @@ def detect_etiqueta(etiquetas):
     
     def caract_ocr(imagem,boxs):
     
-        #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         imagem = Image.fromarray(im)
         #print(type(imagem))
-        #imagem = Image.open("/content/WhatsApp Image 2020-09-11 at 01.03.11.jpeg")
         #print(boxs[3][0],boxs[3][1],(boxs[3][0]+boxs[3][2]),(boxs[3][1]+boxs[3][3]))
         
         id_caracteres=[]
@@ -152,8 +140,7 @@ def detect_etiqueta(etiquetas):
             #0.60 e 0.70 da largura e altura da imagem sao baseados na posição relativa estimada das letras alvo.
             letras = etiqueta.crop((etiqueta_w*0.60,etiqueta_h*0.70,etiqueta_w,etiqueta_h))
             display_img(letras)
-            
-            from easyocr import Reader
+
            
             letras = np.array(letras)
             reader = Reader(['en'])
@@ -168,14 +155,21 @@ def detect_etiqueta(etiquetas):
         return id_caracteres
     
     words = caract_ocr(im,boxs)
-    
+
     return words
 
-cap = cv2.VideoCapture(0)
+# Video source - can be camera index number given by 'ls /dev/video*
+# or can be a video file, e.g. '~/Video.avi'
 
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 600)
+# Using android phone as camera requires the installation of IP Webcam app in phone
+# url will be provided by the afore mentioned app
 
+url = 'http://192.168.15.161:8080/video'
+
+cap = cv2.VideoCapture(url)
+
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 key = cv2. waitKey(1)
 
 while True:
@@ -185,6 +179,7 @@ while True:
         #print(frame) #prints matrix values of each framecd 
         cv2.imshow("Capturing", frame)
         key = cv2.waitKey(1)
+        
         if key == ord('s'): 
             dt = datetime.datetime.now()
             i = str(dt).replace(":","").replace(" ","_")
@@ -192,11 +187,11 @@ while True:
             cap.release()
             cv2.destroyAllWindows()
             etiq_ocr = detect_etiqueta(frame)
+            print(etiq_ocr)
             text_file = open("Output.txt", "a")
-            text_file.write("\n {} - {}".format(dt,etiq_ocr))
+            text_file.write("\n {} - {}".format(dt,str(etiq_ocr)))
             text_file.close()
-            cv2.destroyAllWindows()
-            cap = cv2.VideoCapture(0)
+            cap = cv2.VideoCapture(url)
             
         elif key == ord('q'):
             print("Turning off camera.")
