@@ -24,5 +24,4 @@ ou  modificação do videoCapture para utilizar o webcam `cv2.VideoCapture(0)`
 
 ```
 python Etiquetas_detecet_ocr.py
-pip install easyocr
 ```
