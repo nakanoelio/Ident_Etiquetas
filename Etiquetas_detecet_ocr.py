@@ -35,7 +35,7 @@ def detect_etiqueta(etiquetas):
     #LABELS
     
     # derive the paths to the YOLO weights and model configuration
-    weightsPath = os.path.join("yolov4-obj_final.weights")
+    weightsPath = os.path.join("yolov4-obj_last2.weights")
     configPath = os.path.join("yolov4-obj.cfg")
     
     # Loading the neural network framework Darknet (YOLO was created based on this framework)
@@ -64,7 +64,7 @@ def detect_etiqueta(etiquetas):
         boxes = []
         confidences = []
         classIDs = []
-        threshold = 0.90
+        threshold = 0.50
         
         # loop over each of the layer outputs
         for output in layerOutputs:
@@ -109,7 +109,8 @@ def detect_etiqueta(etiquetas):
                 # extract the bounding box coordinates
                 (x, y) = (boxes[i][0], boxes[i][1])
                 (w, h) = (boxes[i][2], boxes[i][3])
-                b_bxs.append([x,y,w,h])
+                if (w != 0 and h != 0):
+                    b_bxs.append([x,y,w,h])
                 
                 # draw a bounding box rectangle and label on the image
                 color = (0,255,0)
@@ -123,10 +124,11 @@ def detect_etiqueta(etiquetas):
     #img = cv2.imread(etiquetas)
     #img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
 
-    etiquetas = cv2.cvtColor(etiquetas, cv2.COLOR_BGR2RGB)
+    #etiquetas = cv2.cvtColor(etiquetas, cv2.COLOR_BGR2RGB)
     im, boxs = predict(etiquetas)
-    
-    display_img(im)
+    im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+    cv2.imwrite(filename='pics/bbooox'+i+'.png', img=im)
+    #display_img(im)
     
     #print(boxs)
     
@@ -169,7 +171,6 @@ def detect_etiqueta(etiquetas):
     
     return words
 
-    
 cap = cv2.VideoCapture(0)
 
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 800)
@@ -187,11 +188,10 @@ while True:
         if key == ord('s'): 
             dt = datetime.datetime.now()
             i = str(dt).replace(":","").replace(" ","_")
-            cv2.imwrite(filename='pics/saved_img'+i+'.jpg', img=frame)
+            cv2.imwrite(filename='pics/etiqueta'+i+'.png', img=frame)
             cap.release()
-            
+            cv2.destroyAllWindows()
             etiq_ocr = detect_etiqueta(frame)
-            #cv2.waitKey(1650)
             text_file = open("Output.txt", "a")
             text_file.write("\n {} - {}".format(dt,etiq_ocr))
             text_file.close()
